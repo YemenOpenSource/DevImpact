@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html>
       <body>
-     DevImpact
+        {children}
       </body>
     </html>
   );
