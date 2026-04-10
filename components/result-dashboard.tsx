@@ -4,17 +4,9 @@ import { BreakdownBars } from "./breakdown-bars";
 import { TopList } from "./top-list";
 import { InsightsList } from "./insights-list";
 import { ScoreCard } from "./score-card";
-
-type UserResult = {
-  username: string;
-  repoScore: number;
-  prScore: number;
-  contributionScore: number;
-  finalScore: number;
-  topRepos: { name?: string; stars?: number; forks?: number; score?: number }[];
-  topPullRequests: { repo?: string; stars?: number; score?: number }[];
-  insights?: string[];
-};
+import { Card, CardContent } from "./ui/card";
+import { Trophy } from "lucide-react";
+import { UserResult } from "@/types/user-result";
 
 type Props = {
   user1: UserResult;
@@ -30,98 +22,112 @@ export function ResultDashboard({ user1, user2 }: Props) {
         : user2;
   const loser = winner === user1 ? user2 : user1;
   const diffPct = winner
-    ? Math.round(((winner.finalScore - loser.finalScore) / loser.finalScore) * 100)
+    ? Math.round(
+        ((winner.finalScore - loser.finalScore) / loser.finalScore) * 100,
+      )
     : 0;
+
+  const getInsights = () => {
+    const insights = [];
+    if (user1.repoScore > user2.repoScore) {
+      insights.push(
+        `${user1.username} has stronger repository portfolio with ${user1.repoScore} vs ${user2.repoScore}`,
+      );
+    } else if (user2.repoScore > user1.repoScore) {
+      insights.push(
+        `${user2.username} has stronger repository portfolio with ${user2.repoScore} vs ${user1.repoScore}`,
+      );
+    } else {
+      insights.push(`Both developers have equal repository strength`);
+    }
+
+    if (user1.prScore > user2.prScore) {
+      insights.push(
+        `${user1.username} leads in pull request impact (${user1.prScore} vs ${user2.prScore})`,
+      );
+    } else if (user2.prScore > user1.prScore) {
+      insights.push(
+        `${user2.username} leads in pull request impact (${user2.prScore} vs ${user1.prScore})`,
+      );
+    } else {
+      insights.push(`Both developers have equal pull request impact`);
+    }
+
+    if (user1.contributionScore > user2.contributionScore) {
+      insights.push(`${user1.username} shows higher contribution activity`);
+    } else if (user2.contributionScore > user1.contributionScore) {
+      insights.push(`${user2.username} shows higher contribution activity`);
+    } else {
+      insights.push(`Both developers have similar contribution levels`);
+    }
+
+    return insights;
+  };
+
+  const repoDiff =
+    Math.max(user1.repoScore, user2.repoScore) -
+    Math.min(user1.repoScore, user2.repoScore);
+  const prDiff =
+    Math.max(user1.prScore, user2.prScore) -
+    Math.min(user1.prScore, user2.prScore);
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Winner banner */}
-      <div className="card p-6 flex flex-col gap-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg">
-        {winner ? (
-          <>
-            <p className="text-sm text-white/80">Metric</p>
-            <h2 className="text-2xl font-semibold">
-              🏆 {winner.username} wins
-            </h2>
-            <p className="text-sm text-white/80">
-              {diffPct}%
-              higher final score than
-              {
-                loser.username
-              }
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-white/80">Metric</p>
-            <h2 className="text-xl font-semibold">It's a tie — both developers are evenly matched.</h2>
-          </>
-        )}
-      </div>
+      <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+        <CardContent className="flex items-center justify-between p-6">
+          {winner ? (
+            <>
+              <div className="flex items-center gap-4">
+                <div className="rounded-full bg-primary/20 p-3">
+                  <Trophy className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Winner</p>
+                  <p className="text-3xl font-bold">{winner.username}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Lead by</p>
+                <p className="text-2xl font-bold text-primary">{diffPct}%</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-white/80">
+                Metric
+              </p>
+              <h2 className="text-xl font-semibold">
+                It's a tie — both developers are evenly matched.
+              </h2>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Score cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <ScoreCard
           title={user1.username}
           value={user1.finalScore}
-          highlight={winner?.username === user1.username}
+          highlight={user1.isWinner}
           subtitle="Final score"
         />
         <ScoreCard
           title={user2.username}
           value={user2.finalScore}
-          highlight={winner?.username === user2.username}
+          highlight={user2.isWinner}
           subtitle="Final score"
         />
-        <ScoreCard title="Repo diff" value={user1.repoScore - user2.repoScore} />
-        <ScoreCard title="PR diff" value={user1.prScore - user2.prScore} />
+        <ScoreCard title="Repo diff" value={repoDiff} />
+        <ScoreCard title="PR diff" value={prDiff} />
       </div>
 
       <ComparisonTable user1={user1} user2={user2} />
-
       <ComparisonChart user1={user1} user2={user2} />
+      <BreakdownBars user1={user1} user2={user2} />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <BreakdownBars user={user1} />
-        <BreakdownBars user={user2} />
-      </div>
+      <TopList userResults={[user1, user2]} />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <TopList
-          title={`${user1.username} — Top repos`}
-          items={user1.topRepos || []}
-          variant="repo"
-        />
-        <TopList
-          title={`${user2.username} — Top repos`}
-          items={user2.topRepos || []}
-          variant="repo"
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <TopList
-          title={`${user1.username} — Top PRs`}
-          items={user1.topPullRequests || []}
-          variant="pr"
-        />
-        <TopList
-          title={`${user2.username} — Top PRs`}
-          items={user2.topPullRequests || []}
-          variant="pr"
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <InsightsList
-          title={`${user1.username} insights`}
-          insights={user1.insights || []}
-        />
-        <InsightsList
-          title={`${user2.username} insights`}
-          insights={user2.insights || []}
-        />
-      </div>
+      <InsightsList insights={getInsights()} />
     </div>
   );
 }

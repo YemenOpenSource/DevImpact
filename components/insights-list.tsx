@@ -1,18 +1,30 @@
+import { TrendingUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+
 type Props = {
   insights: string[];
-  title?: string;
 };
 
-export function InsightsList({ insights, title = "Insights" }: Props) {
-  if (!insights?.length) return null;
+export function InsightsList({ insights }: Props) {
+
   return (
-    <div className="card p-4">
-      <h3 className="text-sm font-semibold text-slate-800 mb-2">{title}</h3>
-      <ul className="space-y-2 text-sm text-slate-700 list-disc list-inside">
-        {insights.map((insight, idx) => (
-          <li key={idx}>{insight}</li>
-        ))}
-      </ul>
-    </div>
+        <Card className="bg-gradient-to-r from-primary/5 to-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Key Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {insights.map((insight, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <span className="text-primary mt-0.5">•</span>
+                      {insight}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
   );
 }

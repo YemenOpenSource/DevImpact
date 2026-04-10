@@ -12,13 +12,13 @@ const LOG = Math.log;
 function calculateRepoScore(
   repos: RepoNode[]
 ): { total: number; details: RepoScoreDetail[] } {
-  const details = repos.map((repo) => ({
-    repo,
-    score:
-      LOG(repo.stargazerCount + 1) * 5 +
+  const details = repos.map((repo) => {
+
+    const score = LOG(repo.stargazerCount + 1) * 5 +
       LOG(repo.forkCount + 1) * 3 +
-      LOG(repo.watchers.totalCount + 1) * 2,
-  }));
+      LOG(repo.watchers.totalCount + 1) * 2
+    return { repo, score: Math.round(score) };
+  });
 
   details.sort((a, b) => b.score - a.score);
 
@@ -47,7 +47,7 @@ function calculatePRScore(
 
     const repoKey = pr.repository.nameWithOwner;
     grouped[repoKey] ||= [];
-    grouped[repoKey].push({ pr, score });
+    grouped[repoKey].push({ pr, score: Math.round(score) });
   }
 
   let total = 0;
@@ -93,7 +93,9 @@ export function calculateUserScore(
 } {
   const repoScore = calculateRepoScore(data.repos);
   const prScore = calculatePRScore(data.pullRequests, username);
-  const contributionScore = calculateContributionScore(data.contributions);
+  let contributionScore = calculateContributionScore(data.contributions);
+  contributionScore = Math.min(contributionScore, 0.3 * (repoScore.total + prScore.total))
+
 
   const finalScore =
     repoScore.total * 0.4 + prScore.total * 0.4 + contributionScore * 0.2;
@@ -115,6 +117,8 @@ export function calculateUserScore(
       title: item.pr.repository.nameWithOwner,
       stars: item.pr.repository.stargazerCount,
       score: item.score,
+      additions: item.pr.additions,
+      deletions: item.pr.deletions,
     })),
   };
 }

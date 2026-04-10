@@ -23,10 +23,10 @@ export async function GET(request: Request) {
 
         return {
           username,
-          repoScore: score.repoScore,
-          prScore: score.prScore,
-          contributionScore: score.contributionScore,
-          finalScore: score.finalScore,
+          repoScore: Math.round(score.repoScore),
+          prScore: Math.round(score.prScore),
+          contributionScore: Math.round(score.contributionScore),
+          finalScore: Math.round(score.finalScore),
           topRepos: score.topRepos,
           topPullRequests: score.topPullRequests,
         };

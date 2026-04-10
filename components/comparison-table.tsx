@@ -1,61 +1,63 @@
+import { UserResult } from "@/types/user-result";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+
 type ScoreRow = {
   label: string;
   key: "finalScore" | "repoScore" | "prScore" | "contributionScore";
 };
 
 const rows: ScoreRow[] = [
-  { label: "Final Score", key: "finalScore" },
-  { label: "Repo Score", key: "repoScore" },
-  { label: "PR Score", key: "prScore" },
-  { label: "Contribution", key: "contributionScore" },
+  { label: "result.table.final", key: "finalScore" },
+  { label: "result.table.repo", key: "repoScore" },
+  { label: "result.table.pr", key: "prScore" },
+  { label: "result.table.contribution", key: "contributionScore" },
 ];
 
 type ComparisonTableProps = {
-  user1: any;
-  user2: any;
+  user1: UserResult;
+  user2: UserResult;
 };
 
 export function ComparisonTable({ user1, user2 }: ComparisonTableProps) {
+
   return (
-    <div className="card overflow-hidden">
-      <table className="min-w-full">
-        <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
-          <tr>
-            <th className="px-4 py-3">Metric</th>
-            <th className="px-4 py-3">{user1.username}</th>
-            <th className="px-4 py-3">{user2.username}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100 text-sm">
-          {rows.map((row) => {
-            const v1 = user1[row.key] ?? 0;
-            const v2 = user2[row.key] ?? 0;
-            const highlight1 = v1 > v2;
-            const highlight2 = v2 > v1;
-            return (
-              <tr key={row.key}>
-                <td className="px-4 py-3 font-medium text-slate-700">
-                  {row.label}
-                </td>
-                <td
-                  className={`px-4 py-3 ${
-                    highlight1 ? "text-blue-600 font-semibold" : "text-slate-800"
-                  }`}
-                >
-                  {v1.toFixed(2)}
-                </td>
-                <td
-                  className={`px-4 py-3 ${
-                    highlight2 ? "text-blue-600 font-semibold" : "text-slate-800"
-                  }`}
-                >
-                  {v2.toFixed(2)}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="grid md:grid-cols-2 gap-6">
+      {[user1, user2].map((user, idx) => (
+        <Card key={user.username} className="overflow-hidden transition-all hover:shadow-lg">
+          <CardHeader className={user.isWinner ? "border-b-2 border-primary/30" : "border-b-2 border-muted"}>
+            <CardTitle className="flex items-center justify-between">
+              <span>{user.username}</span>
+              {user.isWinner && (
+                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">Winner</span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex justify-between items-center border-b pb-2">
+              <span className="text-muted-foreground">Final Score</span>
+              <span className="text-2xl font-bold">{user.finalScore}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Repo Score</span>
+              <span className={`font-semibold ${user.repoScore > (idx === 0 ? user2.repoScore : user1.repoScore) ? "text-primary" : ""}`}>
+                {user.repoScore}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">PR Score</span>
+              <span className={`font-semibold ${user.prScore > (idx === 0 ? user2.prScore : user1.prScore) ? "text-primary" : ""}`}>
+                {user.prScore}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Contribution Score</span>
+              <span className={`font-semibold ${user.contributionScore > (idx === 0 ? user2.contributionScore : user1.contributionScore) ? "text-primary" : ""}`}>
+                {user.contributionScore}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

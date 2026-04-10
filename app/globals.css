@@ -31,12 +31,10 @@ body {
 .card {
   @apply bg-white/90 shadow-card rounded-2xl border border-slate-100 backdrop-blur;
   transition: transform 180ms ease, box-shadow 180ms ease;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
-}
 
 .dark .card {
   @apply bg-slate-900/80 border-slate-800;
