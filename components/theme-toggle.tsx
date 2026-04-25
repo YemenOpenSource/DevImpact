@@ -2,10 +2,10 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button, Icon } from "./ui/button";
 import { useSyncExternalStore } from "react";
 import { useTranslation } from "./language-provider";
-import { FaGithub } from "react-icons/fa";
+import { Button } from "./ui/button";
+import { GithubLink } from "./github-link";
 
 const emptySubscribe = () => () => { };
 
@@ -44,19 +44,7 @@ export function ThemeToggle() {
       >
         {mounted && current === "dark" ? <Sun size={16} /> : <Moon size={16} />}
       </Button>
-      <a href="https://github.com/O2sa/DevImpact"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="GitHub Repository">
-        <Icon
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <FaGithub className="text-black dark:text-white" />
-        </Icon>
-      </a>
+      <GithubLink />
 
 
     </div>
